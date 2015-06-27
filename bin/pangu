@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+
+var commander = require('commander');
+var pangu = require('../index');
+
+commander
+  .version(require('../package.json').version)
+  .usage('[options] filepath')
+  .option('-v, --version', 'Pangu version.')
+  .option('-c, --convert', 'Convert text to standardization.')
+  .parse(process.argv);
+
+if (commander.args.length === 0) {
+  commander.help();
+}
+
+function processing(handler) {
+  var prev = '';
+
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('readable', function() {
+    var chunk = process.stdin.read();
+    if (chunk !== null) {
+      var index = chunk.lastIndexOf('\n') + 1;
+      if (index) {
+        process.stdout.write(handler(prev + chunk.substring(0, index)));
+      }
+      prev = chunk.substring(index);
+    }
+  });
+
+  process.stdin.on('end', function() {
+    if (prev) {
+      process.stdout.write(handler(prev));
+      prev = '';
+    }
+  });
+}
+
+function convert() {
+  processing(function (text) {
+    return pangu.convert(text);
+  });
+}
+
+function lint() {
+  processing(function (text) {
+    var result = pangu.lint(text);
+    var s = [];
+    result.forEach(function(record) {
+      console.log(record)
+      s.push(record.lineno + ':' + record.colno + ' ' + record.type + '|' + record.message);
+    });
+    return s.join('\n');
+  });
+}
+
+if (commander.convert) {
+  convert();
+} else {
+  lint();
+}
+
+/*
+ vim:ft=javascript
+ */

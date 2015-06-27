@@ -1,0 +1,25 @@
+{
+  "name": "pangu",
+  "version": "0.1.0",
+  "description": "盘古之白，中文标准化工具。",
+  "main": "index.js",
+  "bin": {
+    "pangu": "./bin/pangu",
+    "pangulint": "./bin/pangulint"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "author": "闲耘 <hotoo.cn@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "~2.8.0",
+    "marked": "^0.3.3",
+    "mdast": "^0.19.0",
+    "merge": "^1.2.0"
+  },
+  "devDependencies": {
+    "mocha": "~2.2.4",
+    "should": "~6.0.1"
+  }
+}
