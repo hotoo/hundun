@@ -1,8 +1,6 @@
 
 var should = require('should');
-
 var pangu = require('../');
-
 
 describe('pangu.fixup()', function () {
 
@@ -47,4 +45,25 @@ describe('pangu.fixup()', function () {
     });
   });
 
+});
+
+describe('pangu.lint()', function () {
+  // 默认选项，中英文之间使用盘古之白，标点符号等自动处理。
+  var testcases_fixup = [
+    ['english', []],
+    ['english.', []],
+    ['中文', []],
+    ['中文.', [{colno:3, lineno:1, message:'Use full-width punctuation please.', type:'error'}]],
+    ['(中文)', [
+      {colno:1, lineno:1, message:'Use full-width punctuation please.', type:'error'},
+      {colno:4, lineno:1, message:'Use full-width punctuation please.', type:'error'},
+    ]],
+    //['fixup("中文english中文english中文.")', 'fixup("中文 english 中文 english 中文。")'],
+  ];
+
+  testcases_fixup.forEach(function(testcase) {
+    it('lint("' + testcase[0] + '") = ' + testcase[1], function () {
+      pangu.lint(testcase[0]).should.be.eql(testcase[1]);
+    });
+  });
 });

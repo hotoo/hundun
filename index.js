@@ -20,4 +20,16 @@ module.exports = function(text, options) {
   default:
     return pangu(text, options);
   }
-}
+};
+
+module.exports.lint = function(text, options) {
+  options = merge(true, DEFAULT_OPTIONS, options);
+
+  switch(options.file_type){
+  case 'markdown':
+    return mdpangu.lint(text, options);
+  //case 'text':
+  default:
+    return pangu.lint(text, options);
+  }
+};
