@@ -20,7 +20,9 @@ if (commander.args.length === 0) {
 
 
 function fixup (filepath) {
-  var options = {};
+  var options = {
+    pangu_spacing: commander.spacing || ' ',
+  };
   if (RE_MARKDOWN.test(filepath)) {
     options.file_type = 'markdown';
   } else if (RE_TEXT.test(filepath)) {

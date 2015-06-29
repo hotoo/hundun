@@ -45,6 +45,20 @@ describe('pangu.fixup()', function () {
     });
   });
 
+  // 中英文混沌状态。
+  var testcases_fixup_pangu_spacing = [
+    ['english 2', 'english 2'],
+    ['中文2', '中文2'],
+    ['中文 2', '中文2'],
+    ['中文  2', '中文2'],
+  ];
+
+  testcases_fixup_pangu_spacing.forEach(function(testcase) {
+    it('fixup("' + testcase[0] + '", {pangu_spacing:""}) = ' + testcase[1], function () {
+      pangu(testcase[0], {pangu_spacing: ''}).should.be.eql(testcase[1]);
+    });
+  });
+
 });
 
 describe('pangu.lint()', function () {
