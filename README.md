@@ -1,9 +1,20 @@
 
 # pangu
 
+[![NPM version][npm-badge]][npm-url]
+[![Build status][travis-badge]][travis-url]
+[![Coveralls status][Coveralls-badge]][coveralls-url]
+
+[npm-badge]: https://img.shields.io/npm/v/pinyin.svg?style=flat
+[npm-url]: https://www.npmjs.com/package/hundun
+[travis-badge]: https://travis-ci.org/hotoo/pangu.svg
+[travis-url]: https://travis-ci.org/hotoo/pangu
+[coveralls-badge]: https://coveralls.io/repos/hotoo/pangu/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/r/hotoo/pangu
+
 盘古之白。中文自动规范化工具。
 
-## Install
+## INSTALL
 
 via npm:
 
@@ -11,7 +22,7 @@ via npm:
 $ npm install hundun [-g]
 ```
 
-## Usage
+## USAGE
 
 ### CLI
 
