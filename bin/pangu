@@ -2,14 +2,15 @@
 
 var commander = require('commander');
 var fs = require('fs');
+var glob = require('glob');
 var pangu = require('../index');
 
 commander
   .version(require('../package.json').version)
   .usage('[options] <filepath>')
   .option('-v, --version', 'Pangu version.')
-  .option('-f, --file <filepath>', 'Format file.')
-  .option('-d, --dir <dirpath>', 'Format files in dir.')
+  .option('-r, --recursive', 'Recursive sub-dir.')
+  .option('-s, --spacing <spacing>', 'PanGu spacing, default is whitespace `" "`.')
   .option('-i, --in-place <extension>', 'Edit files in-place, saving backups with the specified extension.')
   .parse(process.argv);
 
@@ -19,15 +20,6 @@ if (commander.args.length === 0) {
 
 
 function fixup (filepath) {
-
-}
-
-var RE_MARKDOWN = /\.(?:md|markd|markdown)$/i;
-var RE_TEXT = /\.text$/i;
-
-var filepaths = commander.args;
-
-filepaths.forEach(function(filepath) {
   var options = {};
   if (RE_MARKDOWN.test(filepath)) {
     options.file_type = 'markdown';
@@ -35,13 +27,15 @@ filepaths.forEach(function(filepath) {
     options.file_type = 'text';
   } else {
     console.error('Not support file: ' + filepath);
+    return 1;
   }
 
-  var text = fs.readFile(filepath, {encoding: 'utf8'}, function(err, text) {
+  fs.readFile(filepath, {encoding: 'utf8'}, function(err, text) {
     if (err) {
-      return console.error('Read file %s error: %s', filepath, err.message);
+      console.error('Read file %s error: %s', filepath, err.message);
+      return 1;
     }
-    var spaced = pangu(text);
+    var spaced = pangu(text, options);
     if (commander.inPlace === undefined) {
       console.log(spaced);
     } else {
@@ -52,6 +46,35 @@ filepaths.forEach(function(filepath) {
       });
     }
   });
+  return 0;
+}
+
+var RE_MARKDOWN = /\.(?:md|markd|markdown)$/i;
+var RE_TEXT = /\.text$/i;
+
+var uris = commander.args;
+
+uris.forEach(function(uri) {
+
+  var stat = fs.statSync(uri);
+  if (stat.isFile()) {
+    fixup(uri);
+  } else {
+    var cwd = process.cwd();
+    if (stat.isDirectory()) {
+      uri = commander.recursive ? '**/*.*' : '*.*';
+      cwd = uri;
+    }
+    glob(uri, function(err, files) {
+      if (err) {
+        return console.error('incorrect path %s: %s', files, err.message);
+      }
+      files.forEach(function(filepath) {
+        fixup(filepath);
+      });
+    });
+  }
+
 });
 
 // vim:ft=javascript
