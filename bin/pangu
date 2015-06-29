@@ -1,66 +1,57 @@
 #!/usr/bin/env node
 
 var commander = require('commander');
+var fs = require('fs');
 var pangu = require('../index');
 
 commander
   .version(require('../package.json').version)
-  .usage('[options] filepath')
+  .usage('[options] <filepath>')
   .option('-v, --version', 'Pangu version.')
-  .option('-c, --convert', 'Convert text to standardization.')
+  .option('-f, --file <filepath>', 'Format file.')
+  .option('-d, --dir <dirpath>', 'Format files in dir.')
+  .option('-i, --in-place <extension>', 'Edit files in-place, saving backups with the specified extension.')
   .parse(process.argv);
 
 if (commander.args.length === 0) {
   commander.help();
 }
 
-function processing(handler) {
-  var prev = '';
 
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('readable', function() {
-    var chunk = process.stdin.read();
-    if (chunk !== null) {
-      var index = chunk.lastIndexOf('\n') + 1;
-      if (index) {
-        process.stdout.write(handler(prev + chunk.substring(0, index)));
-      }
-      prev = chunk.substring(index);
+function fixup (filepath) {
+
+}
+
+var RE_MARKDOWN = /\.(?:md|markd|markdown)$/i;
+var RE_TEXT = /\.text$/i;
+
+var filepaths = commander.args;
+
+filepaths.forEach(function(filepath) {
+  var options = {};
+  if (RE_MARKDOWN.test(filepath)) {
+    options.file_type = 'markdown';
+  } else if (RE_TEXT.test(filepath)) {
+    options.file_type = 'text';
+  } else {
+    console.error('Not support file: ' + filepath);
+  }
+
+  var text = fs.readFile(filepath, {encoding: 'utf8'}, function(err, text) {
+    if (err) {
+      return console.error('Read file %s error: %s', filepath, err.message);
+    }
+    var spaced = pangu(text);
+    if (commander.inPlace === undefined) {
+      console.log(spaced);
+    } else {
+      fs.writeFile(filepath + commander.inPlace, spaced, function(ex) {
+        if (err) {
+          console.error('Write file %s failed: %s', filepath, ex.message);
+        }
+      });
     }
   });
+});
 
-  process.stdin.on('end', function() {
-    if (prev) {
-      process.stdout.write(handler(prev));
-      prev = '';
-    }
-  });
-}
-
-function convert() {
-  processing(function (text) {
-    return pangu.convert(text);
-  });
-}
-
-function lint() {
-  processing(function (text) {
-    var result = pangu.lint(text);
-    var s = [];
-    result.forEach(function(record) {
-      console.log(record)
-      s.push(record.lineno + ':' + record.colno + ' ' + record.type + '|' + record.message);
-    });
-    return s.join('\n');
-  });
-}
-
-if (commander.convert) {
-  convert();
-} else {
-  lint();
-}
-
-/*
- vim:ft=javascript
- */
+// vim:ft=javascript
