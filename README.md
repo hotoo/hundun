@@ -12,13 +12,17 @@
 [coveralls-badge]: https://coveralls.io/repos/hotoo/pangu/badge.svg?branch=master
 [coveralls-url]: https://coveralls.io/r/hotoo/pangu
 
+> **WARNING**: MARKDOWN SUPPORT NOT READY FOR HUMAN.
+>
+> **警告**：MARKDOWN 支持还不够人性化。
+
 盘古之白。中文自动规范化工具。
 
 ## INSTALL
 
 via npm:
 
-```
+```bash
 $ npm install hundun [-g]
 ```
 
@@ -26,7 +30,7 @@ $ npm install hundun [-g]
 
 ### CLI
 
-```
+```bash
 $ pangu file.md
 $ pangu ./dir
 $ pangulint file.md
