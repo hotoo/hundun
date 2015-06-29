@@ -5,7 +5,7 @@
 [![Build status][travis-badge]][travis-url]
 [![Coveralls status][Coveralls-badge]][coveralls-url]
 
-[npm-badge]: https://img.shields.io/npm/v/pinyin.svg?style=flat
+[npm-badge]: https://img.shields.io/npm/v/pangu.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/hundun
 [travis-badge]: https://travis-ci.org/hotoo/pangu.svg
 [travis-url]: https://travis-ci.org/hotoo/pangu
