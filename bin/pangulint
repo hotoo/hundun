@@ -1,67 +1,76 @@
 #!/usr/bin/env node
 
 var commander = require('commander');
+var fs = require('fs');
+var glob = require('glob');
 var pangu = require('../index');
 
 commander
   .version(require('../package.json').version)
-  .usage('[options] <filepath|text>')
+  .usage('[options] <filepath>')
   .option('-v, --version', 'Pangu version.')
-  .option('-f, --file <filepath>', 'Format file.')
-  .option('-d, --dir <dirpath>', 'Format files in dir.')
+  .option('-r, --recursive', 'Recursive sub-dir.')
+  .option('-s, --spacing <spacing>', 'PanGu spacing, default is whitespace `" "`.')
+  .option('-i, --in-place <extension>', 'Edit files in-place, saving backups with the specified extension.')
   .parse(process.argv);
 
 if (commander.args.length === 0) {
   commander.help();
 }
 
-function processing(handler) {
-  var prev = '';
+function lint (filepath) {
+  var options = {
+    pangu_spacing: commander.spacing || ' ',
+  };
+  if (RE_MARKDOWN.test(filepath)) {
+    options.file_type = 'markdown';
+  } else if (RE_TEXT.test(filepath)) {
+    options.file_type = 'text';
+  } else {
+    console.error('Not support file: ' + filepath);
+    return 1;
+  }
 
-  process.stdin.setEncoding('utf8');
-  process.stdin.on('readable', function() {
-    var chunk = process.stdin.read();
-    if (chunk !== null) {
-      var index = chunk.lastIndexOf('\n') + 1;
-      if (index) {
-        process.stdout.write(handler(prev + chunk.substring(0, index)));
+  fs.readFile(filepath, {encoding: 'utf8'}, function(err, text) {
+    if (err) {
+      console.error('Read file %s error: %s', filepath, err.message);
+      return 1;
+    }
+    var results = pangu.lint(text, options);
+    results.forEach(function(result) {
+      console.log(filepath + ':' + result.lineno + ':' + result.colno +
+        ' [' + result.type + ']: ' + result.message);
+    })
+  });
+  return 0;
+}
+
+var RE_MARKDOWN = /\.(?:md|markd|markdown)$/i;
+var RE_TEXT = /\.(?:txt|text)$/i;
+
+var uris = commander.args;
+
+uris.forEach(function(uri) {
+
+  var stat = fs.statSync(uri);
+  if (stat.isFile()) {
+    lint(uri);
+  } else {
+    var cwd = process.cwd();
+    if (stat.isDirectory()) {
+      uri = commander.recursive ? '**/*.*' : '*.*';
+      cwd = uri;
+    }
+    glob(uri, function(err, files) {
+      if (err) {
+        return console.error('incorrect path %s: %s', files, err.message);
       }
-      prev = chunk.substring(index);
-    }
-  });
-
-  process.stdin.on('end', function() {
-    if (prev) {
-      process.stdout.write(handler(prev));
-      prev = '';
-    }
-  });
-}
-
-function convert() {
-  processing(function (text) {
-    return pangu.convert(text);
-  });
-}
-
-function lint() {
-  processing(function (text) {
-    var result = pangu.lint(text);
-    var s = [];
-    result.forEach(function(record) {
-      console.log(record)
-      s.push(record.lineno + ':' + record.colno + ' ' + record.type + '|' + record.message);
+      files.forEach(function(filepath) {
+        lint(filepath);
+      });
     });
-    return s.join('\n');
-  });
-}
+  }
 
-if (commander.convert) {
-  convert();
-} else {
-  lint();
-}
+});
 
-/*
- vim:ft=javascript
- */
+// vim:ft=javascript
