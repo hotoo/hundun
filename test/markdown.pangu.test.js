@@ -6,8 +6,8 @@ describe('pangu.fixup(text, {file_type: markdown})', function () {
 
   var testcases_fixup = [
     // list
-    ['* english', '*   english\n'],
-    ['- english.', '*   english.\n'],
+    ['* english', '* english\n'],
+    ['- english.', '* english.\n'],
     // format
     ['**中文en**', '**中文 en**\n'],
     ['_中文._', '_中文。_\n'],
